@@ -17,18 +17,22 @@ namespace Final_Game_2026
         Rectangle player;
         Vector2 playerPosition;
         Vector2 speed;
-        Vector2 square1speed = new Vector2(2, 0);
+        Vector2 square1speed = new Vector2(-4, 0);
+        Vector2 square2speed = new Vector2(-7, 0);
         Random generator;
         List<Rectangle> square1rectangle;
+        List<Rectangle> square2rectangle;
         List<Texture2D> square1textures;
+        List<Texture2D> square2textures;
         Random random = new Random();
         Rectangle window;
         Texture2D square1texture;
+        Texture2D square2texture;
         float respawntime;
         float seconds;
 
 
-        List<Rectangle> platforms;
+        Rectangle ground;
 
 
 
@@ -52,6 +56,8 @@ namespace Final_Game_2026
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             square1rectangle = new List<Rectangle>();
             square1textures = new List<Texture2D>();
+            square2rectangle = new List<Rectangle>();
+            square2textures = new List<Texture2D>();
 
             respawntime = 2f;
             speed = Vector2.Zero;
@@ -59,10 +65,9 @@ namespace Final_Game_2026
             playerPosition = new Vector2(10, 10);
             player = new Rectangle(10, 10, 50, 50);
 
-            platforms = new List<Rectangle>();
 
             
-            platforms.Add(new Rectangle(0, 400, 800, 20));
+            ground = new Rectangle(0, 400, 800, 20);
 
             base.Initialize();
         }
@@ -72,6 +77,7 @@ namespace Final_Game_2026
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             rectangleTexture = Content.Load<Texture2D>("images/bluesquare");
             square1texture = Content.Load<Texture2D>("Images/redsquare");
+            square2texture = Content.Load<Texture2D>("Images/brownsquare");
 
 
             // TODO: use this.Content to load your game content here
@@ -85,13 +91,30 @@ namespace Final_Game_2026
             seconds += (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (seconds >= respawntime)
             {
-                for (int i = 1; i <= 5; i++)
+               
+                for (int i = 1; i <= 1; i++)
+                {
                     square1rectangle.Add(new Rectangle(
-                         generator.Next(window.Width, window.Width + 150),
-                         generator.Next(0, 130),
-                         50,
-                         50
-                         ));
+                       generator.Next(825, 850),
+                       370,
+                       40,
+                       40
+                       ));
+
+                }
+
+                for (int i = 1; i <= 1; i++)
+                {
+                    square2rectangle.Add(new Rectangle(
+                       generator.Next(825, 850),
+                       270,
+                       35,
+                       35
+                       ));
+                }
+                seconds = 0f;
+
+
             }
             Rectangle temp;
             for (int i = 0; i < square1rectangle.Count; i++)
@@ -99,6 +122,12 @@ namespace Final_Game_2026
                 temp = square1rectangle[i];
                 temp.X += (int)square1speed.X;
                 square1rectangle[i] = temp;
+            }
+            for (int i = 0; i < square2rectangle.Count; i++)
+            {
+                temp = square2rectangle[i];
+                temp.X += (int)square2speed.X;
+                square2rectangle[i] = temp;
             }
 
             speed.Y += gravity;
@@ -114,19 +143,20 @@ namespace Final_Game_2026
             playerPosition.Y += speed.Y;
             player.Location = playerPosition.ToPoint();
             onGround = false;
-            foreach (Rectangle platform in platforms)
+            
+            if (player.Intersects(ground))
             {
-                if (player.Intersects(platform))
-                {
                   
-                    if (speed.Y > 0)
-                    {
-                        onGround = true;
-                        speed.Y = 0;
-                        playerPosition.Y = platform.Y - player.Height;
-                    }
+                if (speed.Y > 0)
+                {
+                    onGround = true;
+                    speed.Y = 0;
+                    playerPosition.Y = ground.Y - player.Height;
+                    player.Location = playerPosition.ToPoint();
+
                 }
             }
+            
 
             // TODO: Add your update logic here
 
@@ -144,12 +174,15 @@ namespace Final_Game_2026
             {
                 _spriteBatch.Draw(square1texture, square1rectangle[i], Color.White);
             }
-
-
-            foreach (Rectangle platform in platforms)
+            for (int i = 0; i < square2rectangle.Count; i++)
             {
-                _spriteBatch.Draw(rectangleTexture, platform, Color.Black);
+                _spriteBatch.Draw(square2texture, square2rectangle[i], Color.White);
             }
+
+
+
+            _spriteBatch.Draw(rectangleTexture, ground, Color.Black);
+            
 
             _spriteBatch.End();
 
