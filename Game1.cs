@@ -18,7 +18,7 @@ namespace Final_Game_2026
         Vector2 playerPosition;
         Vector2 speed;
         Vector2 square1speed = new Vector2(-4, 0);
-        Vector2 square2speed = new Vector2(-7, 0);
+        Vector2 square2speed = new Vector2(-4, 0);
         Random generator;
         List<Rectangle> square1rectangle;
         List<Rectangle> square2rectangle;
@@ -30,6 +30,8 @@ namespace Final_Game_2026
         Texture2D square2texture;
         float respawntime;
         float seconds;
+
+
 
 
         Rectangle ground;
@@ -91,28 +93,34 @@ namespace Final_Game_2026
             seconds += (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (seconds >= respawntime)
             {
-               
-                for (int i = 1; i <= 1; i++)
-                {
-                    square1rectangle.Add(new Rectangle(
-                       generator.Next(825, 850),
-                       370,
-                       40,
-                       40
-                       ));
 
-                }
-
-                for (int i = 1; i <= 1; i++)
+                if (seconds >= respawntime)
                 {
-                    square2rectangle.Add(new Rectangle(
-                       generator.Next(825, 850),
-                       270,
-                       35,
-                       35
-                       ));
+                    int roll = generator.Next(0, 2);
+
+                    if (roll == 0)
+                    {
+                        square1rectangle.Add(new Rectangle(
+                            generator.Next(825, 850),
+                            370,
+                            40,
+                            40
+                        ));
+                    }
+                    else
+                    {
+                        square2rectangle.Add(new Rectangle(
+                            generator.Next(825, 850),
+                            270,
+                            35,
+                            35
+                        ));
+                    }
+
+                    seconds = 0f;
                 }
                 seconds = 0f;
+
 
 
             }
@@ -155,8 +163,27 @@ namespace Final_Game_2026
                     player.Location = playerPosition.ToPoint();
 
                 }
+
             }
-            
+            for (int i = 0; i < square1rectangle.Count; i++)
+            {
+                if (player.Intersects(square1rectangle[i]))
+                {
+                    Exit();
+                }
+            }
+
+            // collision with square2 obstacles
+            for (int i = 0; i < square2rectangle.Count; i++)
+            {
+                if (player.Intersects(square2rectangle[i]))
+                {
+                    Exit();
+                }
+            }
+
+
+
 
             // TODO: Add your update logic here
 
