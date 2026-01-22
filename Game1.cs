@@ -22,74 +22,52 @@ namespace Final_Game_2026
         private SpriteBatch _spriteBatch;
         Texture2D rectangleTexture;
         GameState currentState = GameState.Start;
-
-
         Rectangle player;
         Vector2 playerPosition;
         Vector2 speed;
-        Vector2 square1speed = new Vector2(-6, 0);
+        //Vector2 square1speed = new Vector2(-6, 0);
+        Vector2 dog2speed = new Vector2(-6, 0);
         Vector2 square2speed = new Vector2(-6, 0);
         Random generator;
-        List<Rectangle> square1rectangle;
+        //List<Rectangle> square1rectangle;
         List<Rectangle> cat1rectangle;
         List<Rectangle> square2rectangle;
+        List<Rectangle> dog2rectangle;
+        List<Rectangle> kniferectangle;
         SoundEffect jumpSound;
-
         List<Texture2D> square2textures;
         Random random = new Random();
         SpriteFont scorefont;
-        
+        SoundEffect gamesound;
         Texture2D runTexture;
         Texture2D endScreenTexture;
         int deathScore = 0;
-
-
-
-
-
-
-
-        Rectangle sourceRect;
-
-        
+        Rectangle sourceRect;  
         bool isJumping = false;
 
         Rectangle window;
         Texture2D bgtexture;
         GameState screen;
         Texture2D startscreentexture;
-        Texture2D square1texture;
+        //Texture2D square1texture;
+        Texture2D dog2texture;
+        Texture2D knifeTexture;
         Texture2D square2texture;
         float respawntime;
         float seconds;
         float timer = 0f;
-        int score = 0;
-       
+        int score = 0;       
         int highScore = 0;
-
         float scoreTimer = 0f;
         float difficultyTimer = 0f;
-
-
-
-
-
-
-
-
         Rectangle ground;
-
-
-
         KeyboardState keyboardState;
-
         float gravity = 0.3f;
         float jumpSpeed = 6.5f;
         bool onGround = false;
         int standHeight = 50;
         int duckHeight = 25;
         bool isDucking = false;
-
         public Game1()
         {
             
@@ -103,7 +81,7 @@ namespace Final_Game_2026
             screen = GameState.Start;
             generator = new Random();
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            square1rectangle = new List<Rectangle>();
+            dog2rectangle = new List<Rectangle>();
            
             square2rectangle = new List<Rectangle>();
             square2textures = new List<Texture2D>();
@@ -128,7 +106,7 @@ namespace Final_Game_2026
             runTexture = Content.Load<Texture2D>("Images/catrun1");
            
 
-            square1texture = Content.Load<Texture2D>("Images/redsquare");
+            dog2texture = Content.Load<Texture2D>("Images/redsquare");
 
 
             square2texture = Content.Load<Texture2D>("Images/brownsquare");
@@ -137,6 +115,9 @@ namespace Final_Game_2026
             startscreentexture = Content.Load<Texture2D>("Images/catstartscreen");
             endScreenTexture = Content.Load<Texture2D>("Images/catendscreen");
             jumpSound = Content.Load<SoundEffect>("soundeffects/catmeow");
+            gamesound = Content.Load<SoundEffect>("soundeffects/retrosound");
+            knifeTexture = Content.Load<Texture2D>("Images/knife");
+            dog2texture = Content.Load<Texture2D>("Images/dog2");
 
 
 
@@ -161,15 +142,18 @@ namespace Final_Game_2026
                     scoreTimer = 0f;
                     difficultyTimer = 0f;
 
-                    square1speed.X = -6;
+                    dog2speed.X = -6;
                     square2speed.X = -6;
                     seconds = 0f;
+                    gamesound.Play();
                 }
 
                 
             }
             else if (screen == GameState.Playing)
             {
+               
+
                 scoreTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
                 if (scoreTimer >= 1f)
@@ -181,16 +165,16 @@ namespace Final_Game_2026
 
                 if (difficultyTimer >= 20f)
                 {
-                    // speed up obstacles
-                    square1speed.X -= 3;
+                   
+                    dog2speed.X -= 3;
                     square2speed.X -= 3;
 
-                    // spawn faster (NO LIMIT = impossible)
+                  
                     respawntime -= 0.25f;
 
                     difficultyTimer = 0f;
                 }
-                // Game playing logic
+               
                 if (seconds >= respawntime)
                 {
 
@@ -200,7 +184,7 @@ namespace Final_Game_2026
 
                         if (roll == 0)
                         {
-                            square1rectangle.Add(new Rectangle(
+                            dog2rectangle.Add(new Rectangle(
                                 generator.Next(825, 850),
                                 275,
                                 40,
@@ -225,11 +209,11 @@ namespace Final_Game_2026
 
                 }
                 Rectangle temp;
-                for (int i = 0; i < square1rectangle.Count; i++)
+                for (int i = 0; i < dog2rectangle.Count; i++)
                 {
-                    temp = square1rectangle[i];
-                    temp.X += (int)square1speed.X;
-                    square1rectangle[i] = temp;
+                    temp = dog2rectangle[i];
+                    temp.X += (int)dog2speed.X;
+                    dog2rectangle[i] = temp;
                 }
                 for (int i = 0; i < square2rectangle.Count; i++)
                 {
@@ -287,9 +271,9 @@ namespace Final_Game_2026
                     player.Location = playerPosition.ToPoint();
 
                 }
-                for (int i = 0; i < square1rectangle.Count; i++)
+                for (int i = 0; i < dog2rectangle.Count; i++)
                 {
-                    if (player.Intersects(square1rectangle[i]))
+                    if (player.Intersects(dog2rectangle[i]))
                     {
                         deathScore = score;
 
@@ -302,20 +286,14 @@ namespace Final_Game_2026
                     }
                 }
 
-                // collision with square2 obstacles
+                
                 for (int i = 0; i < square2rectangle.Count; i++)
                 {
                     if (player.Intersects(square2rectangle[i]))
                     {
                         if (player.Intersects(square2rectangle[i]))
                         {
-                            deathScore = score;
-
-                            if (score > highScore)
-                            {
-                                highScore = score;
-                            }
-
+                            deathScore = score;                       
                             screen = GameState.End; 
                         }
                     }
@@ -372,9 +350,9 @@ namespace Final_Game_2026
 
 
                 _spriteBatch.Draw(runTexture, player, Color.White);
-                for (int i = 0; i < square1rectangle.Count; i++)
+                for (int i = 0; i < dog2rectangle.Count; i++)
                 {
-                    _spriteBatch.Draw(square1texture, square1rectangle[i], Color.White);
+                    _spriteBatch.Draw(dog2texture, dog2rectangle[i], Color.White);
                 }
                 for (int i = 0; i < square2rectangle.Count; i++)
                 {
