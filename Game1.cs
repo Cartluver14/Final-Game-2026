@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -10,7 +11,8 @@ namespace Final_Game_2026
     enum GameState
     {
         Start,
-        Playing
+        Playing,
+        End
     }
 
     
@@ -31,26 +33,25 @@ namespace Final_Game_2026
         List<Rectangle> square1rectangle;
         List<Rectangle> cat1rectangle;
         List<Rectangle> square2rectangle;
-       
+        SoundEffect jumpSound;
+
         List<Texture2D> square2textures;
         Random random = new Random();
         SpriteFont scorefont;
-        // CAT ANIMATION TEXTURES
+        
         Texture2D runTexture;
-        Texture2D jumpTexture;
-        Texture2D duckTexture;
+        Texture2D endScreenTexture;
+        int deathScore = 0;
 
-        // FRAME INFO
-        int currentFrame = 0;
-        int frameWidth = 50;
-        int frameHeight = 50;
 
-        float animationTimer = 0f;
-        float animationSpeed = 0.12f; // lower = faster
+
+
+
+
 
         Rectangle sourceRect;
 
-        // STATES
+        
         bool isJumping = false;
 
         Rectangle window;
@@ -63,10 +64,15 @@ namespace Final_Game_2026
         float seconds;
         float timer = 0f;
         int score = 0;
-
-
-
        
+        int highScore = 0;
+
+        float scoreTimer = 0f;
+        float difficultyTimer = 0f;
+
+
+
+
 
 
 
@@ -78,7 +84,7 @@ namespace Final_Game_2026
         KeyboardState keyboardState;
 
         float gravity = 0.3f;
-        float jumpSpeed = 7f;
+        float jumpSpeed = 6.5f;
         bool onGround = false;
         int standHeight = 50;
         int duckHeight = 25;
@@ -129,6 +135,9 @@ namespace Final_Game_2026
             bgtexture = Content.Load<Texture2D>("Images/kitchentable");
             scorefont = Content.Load<SpriteFont>("fonts/scorefont");
             startscreentexture = Content.Load<Texture2D>("Images/catstartscreen");
+            endScreenTexture = Content.Load<Texture2D>("Images/catendscreen");
+            jumpSound = Content.Load<SoundEffect>("soundeffects/catmeow");
+
 
 
 
@@ -148,6 +157,12 @@ namespace Final_Game_2026
                 if (keyboardState.IsKeyDown(Keys.Enter))
                 {
                     screen = GameState.Playing;
+                    score = 0;
+                    scoreTimer = 0f;
+                    difficultyTimer = 0f;
+
+                    square1speed.X = -6;
+                    square2speed.X = -6;
                     seconds = 0f;
                 }
 
@@ -155,6 +170,26 @@ namespace Final_Game_2026
             }
             else if (screen == GameState.Playing)
             {
+                scoreTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (scoreTimer >= 1f)
+                {
+                    score += 1;
+                    scoreTimer = 0f;
+                }
+                difficultyTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (difficultyTimer >= 20f)
+                {
+                    // speed up obstacles
+                    square1speed.X -= 3;
+                    square2speed.X -= 3;
+
+                    // spawn faster (NO LIMIT = impossible)
+                    respawntime -= 0.25f;
+
+                    difficultyTimer = 0f;
+                }
                 // Game playing logic
                 if (seconds >= respawntime)
                 {
@@ -211,6 +246,8 @@ namespace Final_Game_2026
                 {
                     speed.Y = -jumpSpeed;
                     onGround = false;
+                    jumpSound.Play();
+
                 }
 
                 playerPosition.Y += speed.Y;
@@ -254,7 +291,14 @@ namespace Final_Game_2026
                 {
                     if (player.Intersects(square1rectangle[i]))
                     {
-                        Exit();
+                        deathScore = score;
+
+                        if (score > highScore)
+                        {
+                            highScore = score;
+                        }
+
+                        screen = GameState.End;
                     }
                 }
 
@@ -263,7 +307,17 @@ namespace Final_Game_2026
                 {
                     if (player.Intersects(square2rectangle[i]))
                     {
-                        Exit();
+                        if (player.Intersects(square2rectangle[i]))
+                        {
+                            deathScore = score;
+
+                            if (score > highScore)
+                            {
+                                highScore = score;
+                            }
+
+                            screen = GameState.End; 
+                        }
                     }
                 }
             }
@@ -307,6 +361,14 @@ namespace Final_Game_2026
                     new Rectangle(0, 0, 800, 480),
                     Color.White
                 );
+                _spriteBatch.DrawString(
+                 scorefont,
+                            "Score: " + score,
+                        new Vector2(20, 20),
+                     Color.Black
+                            );
+
+               
 
 
                 _spriteBatch.Draw(runTexture, player, Color.White);
@@ -323,10 +385,27 @@ namespace Final_Game_2026
 
                 _spriteBatch.Draw(rectangleTexture, ground, Color.SandyBrown);
             }
-
-
+            else if (screen == GameState.End)
+            {
+                _spriteBatch.Draw(
+                    endScreenTexture,
+                    new Rectangle(0, 0, 800, 480),
+                    Color.White
+                );
+                _spriteBatch.DrawString(
+                   scorefont,
+                    "YOUR SCORE: " + deathScore,
+                    new Vector2(300, 250),
+                    Color.Black
+                );
                 
-            
+                
+               
+            }
+
+
+
+
 
             _spriteBatch.End();
 
