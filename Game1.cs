@@ -27,7 +27,7 @@ namespace Final_Game_2026
         Vector2 speed;
         //Vector2 square1speed = new Vector2(-6, 0);
         Vector2 dog2speed = new Vector2(-6, 0);
-        Vector2 square2speed = new Vector2(-6, 0);
+        Vector2 knifespeed = new Vector2(-6, 0);
         Random generator;
         //List<Rectangle> square1rectangle;
         List<Rectangle> cat1rectangle;
@@ -38,7 +38,10 @@ namespace Final_Game_2026
         List<Texture2D> square2textures;
         Random random = new Random();
         SpriteFont scorefont;
+        SpriteFont gamefont;
         SoundEffect gamesound;
+        SoundEffectInstance gameSoundInstance;
+        SoundEffect gameover;
         Texture2D runTexture;
         Texture2D endScreenTexture;
         int deathScore = 0;
@@ -51,7 +54,7 @@ namespace Final_Game_2026
         Texture2D startscreentexture;
         //Texture2D square1texture;
         Texture2D dog2texture;
-        Texture2D knifeTexture;
+        Texture2D knifetexture;
         Texture2D square2texture;
         float respawntime;
         float seconds;
@@ -83,7 +86,7 @@ namespace Final_Game_2026
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             dog2rectangle = new List<Rectangle>();
            
-            square2rectangle = new List<Rectangle>();
+            kniferectangle = new List<Rectangle>();
             square2textures = new List<Texture2D>();
 
             respawntime = 2f;
@@ -111,13 +114,16 @@ namespace Final_Game_2026
 
             square2texture = Content.Load<Texture2D>("Images/brownsquare");
             bgtexture = Content.Load<Texture2D>("Images/kitchentable");
-            scorefont = Content.Load<SpriteFont>("fonts/scorefont");
+           
             startscreentexture = Content.Load<Texture2D>("Images/catstartscreen");
             endScreenTexture = Content.Load<Texture2D>("Images/catendscreen");
             jumpSound = Content.Load<SoundEffect>("soundeffects/catmeow");
             gamesound = Content.Load<SoundEffect>("soundeffects/retrosound");
-            knifeTexture = Content.Load<Texture2D>("Images/knife");
+            knifetexture = Content.Load<Texture2D>("Images/knife");
             dog2texture = Content.Load<Texture2D>("Images/dog2");
+            gameover = Content.Load<SoundEffect>("soundeffects/mariodeath");
+            gameSoundInstance = gamesound.CreateInstance();
+            gamefont = Content.Load<SpriteFont>("fonts/font1");
 
 
 
@@ -143,9 +149,9 @@ namespace Final_Game_2026
                     difficultyTimer = 0f;
 
                     dog2speed.X = -6;
-                    square2speed.X = -6;
+                    knifespeed.X = -6;
                     seconds = 0f;
-                    gamesound.Play();
+                    gameSoundInstance.Play();
                 }
 
                 
@@ -167,7 +173,7 @@ namespace Final_Game_2026
                 {
                    
                     dog2speed.X -= 3;
-                    square2speed.X -= 3;
+                    knifespeed.X -= 3;
 
                   
                     respawntime -= 0.25f;
@@ -193,7 +199,7 @@ namespace Final_Game_2026
                         }
                         else
                         {
-                            square2rectangle.Add(new Rectangle(
+                            kniferectangle.Add(new Rectangle(
                                 generator.Next(825, 850),
                                 235,
                                 35,
@@ -215,11 +221,11 @@ namespace Final_Game_2026
                     temp.X += (int)dog2speed.X;
                     dog2rectangle[i] = temp;
                 }
-                for (int i = 0; i < square2rectangle.Count; i++)
+                for (int i = 0; i < kniferectangle.Count; i++)
                 {
-                    temp = square2rectangle[i];
-                    temp.X += (int)square2speed.X;
-                    square2rectangle[i] = temp;
+                    temp = kniferectangle[i];
+                    temp.X += (int)knifespeed.X;
+                    kniferectangle[i] = temp;
                 }
 
                 speed.Y += gravity;
@@ -276,25 +282,27 @@ namespace Final_Game_2026
                     if (player.Intersects(dog2rectangle[i]))
                     {
                         deathScore = score;
+                        gameover.Play();
+                        gameSoundInstance.Stop();
 
-                        if (score > highScore)
-                        {
-                            highScore = score;
-                        }
+
 
                         screen = GameState.End;
                     }
                 }
 
                 
-                for (int i = 0; i < square2rectangle.Count; i++)
+                for (int i = 0; i < kniferectangle.Count; i++)
                 {
-                    if (player.Intersects(square2rectangle[i]))
+                    if (player.Intersects(kniferectangle[i]))
                     {
-                        if (player.Intersects(square2rectangle[i]))
+                        if (player.Intersects(kniferectangle[i]))
                         {
-                            deathScore = score;                       
-                            screen = GameState.End; 
+                            deathScore = score;      
+                            gameover.Play();
+                            screen = GameState.End;
+                            gameSoundInstance.Stop();
+
                         }
                     }
                 }
@@ -325,7 +333,7 @@ namespace Final_Game_2026
                 );
 
                 _spriteBatch.DrawString(
-                   scorefont,
+                   gamefont,
                     "PRESS ENTER TO START",
                     new Vector2(300, 300),
                     Color.Black
@@ -340,7 +348,7 @@ namespace Final_Game_2026
                     Color.White
                 );
                 _spriteBatch.DrawString(
-                 scorefont,
+                 gamefont,
                             "Score: " + score,
                         new Vector2(20, 20),
                      Color.Black
@@ -354,9 +362,9 @@ namespace Final_Game_2026
                 {
                     _spriteBatch.Draw(dog2texture, dog2rectangle[i], Color.White);
                 }
-                for (int i = 0; i < square2rectangle.Count; i++)
+                for (int i = 0; i < kniferectangle.Count; i++)
                 {
-                    _spriteBatch.Draw(square2texture, square2rectangle[i], Color.White);
+                    _spriteBatch.Draw(knifetexture, kniferectangle[i], Color.White);
                 }
 
 
@@ -371,7 +379,7 @@ namespace Final_Game_2026
                     Color.White
                 );
                 _spriteBatch.DrawString(
-                   scorefont,
+                   gamefont,
                     "YOUR SCORE: " + deathScore,
                     new Vector2(300, 250),
                     Color.Black
